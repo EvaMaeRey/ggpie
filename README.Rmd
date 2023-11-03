@@ -11,21 +11,29 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+options(tidyverse.quiet = TRUE)
 ```
 
-# ggpie  🦄
+# ggpie  🦄 (is mostly mythical)
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-The goal of ggpie is to ... 🦄
+The goal of ggpie is to allow this 🦄 interface:
 
 ```{r, eval = F}
+library(ggpie)
+
 ggpie(diamonds) + 
   aes(fill = cut) + 
   geom_wedges()
 ```
+
+
+Observations:  the `ggplot()` function start point has a particular set of defaults that might not be the best suited for final plot.
+
+Assertion: other defaults can be bundled up and serve as grammatically-unproblematic alternative start points.
 
 
 ### Alternative without ggpie
@@ -36,7 +44,7 @@ We're looking at a geom_bar analogue, but it might be nice to do a geom_col too,
 library(tidyverse)
 diamonds %>%
 ggplot() + 
-  aes(x = "all", fill = cut) + 
+  aes(x = 0, fill = cut) + 
   geom_bar() + 
   coord_polar(theta = "y") + 
   theme_void()
@@ -45,27 +53,52 @@ ggplot() +
 # Developing the new API.
 
 ```{r, pie_functions}
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
 defaults_pie <- function(){
   
-  list(aes(x = "all"),
-  coord_polar(theta = "y"),
-  theme_void()
+  list(
+    ggplot2::coord_polar(theta = "y"),
+    ggplot2::theme_void(),
+    ggplot2::aes(x = 0) # hacky; grammar problem
   )
   
 }
 
+#' Title
+#'
+#' @param data 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 ggpie <- function(data){
   
-  ggplot(data = data) + 
+  ggplot2::ggplot(data = data) + 
   defaults_pie()
-  
   
 }
 
+
 # just aliasing to be nice to ourselves
+# probably a better way 
+# is doing more re-writing so that x is not a required aesthetic
+#' Title
+#'
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 geom_wedge <- function(...){
   
-  geom_bar(...)
+  ggplot2::geom_bar(...)
   
 }
 
@@ -80,6 +113,13 @@ geom_wedge <- function(...){
 ggpie(diamonds) + 
   aes(fill = cut) +
   geom_wedge() 
+
+# a ggdonut() function could also be written
+ggpie(diamonds) + 
+  aes(fill = cut) +
+  geom_wedge() +
+  xlim(-2,1)
+  
 ```
 
 
@@ -97,7 +137,7 @@ ggpie(diamonds) +
 knitr::knit_code$get() |> names()
 ```
 
-Use new {readme2pkg} function to do this from readme...
+Use new {readme2pkg} function to do this from readme... ✅ 
 
 ```{r, eval = F}
 readme2pkg::chunk_to_r("pie_functions")
@@ -105,11 +145,11 @@ readme2pkg::chunk_to_r("pie_functions")
 
 
 
-### Added roxygen skeleton? 🚧 
+### Added roxygen skeleton? ✅ 
 
 Use a roxygen skeleton for auto documentation and making sure proposed functions are *exported*.
 
-### Managed dependencies ? 🚧 
+### Managed dependencies ? ✅ 
 
 Package dependencies managed, i.e. `depend::function()` in proposed functions and declared in the DESCRIPTION
 

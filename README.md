@@ -1,19 +1,29 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# ggpie 🦄
+# ggpie 🦄 (is mostly mythical)
 
 <!-- badges: start -->
 
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-The goal of ggpie is to … 🦄
+The goal of ggpie is to allow this 🦄 interface:
 
 ``` r
+library(ggpie)
+
 ggpie(diamonds) + 
   aes(fill = cut) + 
   geom_wedges()
 ```
+
+Observations: the `ggplot()` function start point has a particular set
+of defaults that might not be the best suited for final plot.
+
+Assertion: other defaults can be bundled up and serve as
+grammatically-unproblematic alternative start points.
 
 ### Alternative without ggpie
 
@@ -22,19 +32,9 @@ geom\_col too, where you have the counts yourself.
 
 ``` r
 library(tidyverse)
-#> ── Attaching core tidyverse packages ─────────────────── tidyverse 2.0.0.9000 ──
-#> ✔ dplyr     1.1.0     ✔ readr     2.1.4
-#> ✔ forcats   1.0.0     ✔ stringr   1.5.0
-#> ✔ ggplot2   3.4.4     ✔ tibble    3.2.1
-#> ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
-#> ✔ purrr     1.0.1     
-#> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-#> ✖ dplyr::filter() masks stats::filter()
-#> ✖ dplyr::lag()    masks stats::lag()
-#> ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
 diamonds %>%
 ggplot() + 
-  aes(x = "all", fill = cut) + 
+  aes(x = 0, fill = cut) + 
   geom_bar() + 
   coord_polar(theta = "y") + 
   theme_void()
@@ -45,27 +45,52 @@ ggplot() +
 # Developing the new API.
 
 ``` r
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
 defaults_pie <- function(){
   
-  list(aes(x = "all"),
-  coord_polar(theta = "y"),
-  theme_void()
+  list(
+    ggplot2::coord_polar(theta = "y"),
+    ggplot2::theme_void(),
+    ggplot2::aes(x = 0) # hacky; grammar problem
   )
   
 }
 
+#' Title
+#'
+#' @param data 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 ggpie <- function(data){
   
-  ggplot(data = data) + 
+  ggplot2::ggplot(data = data) + 
   defaults_pie()
-  
   
 }
 
+
 # just aliasing to be nice to ourselves
+# probably a better way 
+# is doing more re-writing so that x is not a required aesthetic
+#' Title
+#'
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 geom_wedge <- function(...){
   
-  geom_bar(...)
+  ggplot2::geom_bar(...)
   
 }
 ```
@@ -79,6 +104,17 @@ ggpie(diamonds) +
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+``` r
+
+# a ggdonut() function could also be written
+ggpie(diamonds) + 
+  aes(fill = cut) +
+  geom_wedge() +
+  xlim(-2,1)
+```
+
+<img src="man/figures/README-unnamed-chunk-4-2.png" width="100%" />
 
 # Part II. Packaging and documentation 🚧 ✅
 
@@ -101,18 +137,18 @@ knitr::knit_code$get() |> names()
 #> [17] "unnamed-chunk-15"
 ```
 
-Use new {readme2pkg} function to do this from readme…
+Use new {readme2pkg} function to do this from readme… ✅
 
 ``` r
 readme2pkg::chunk_to_r("pie_functions")
 ```
 
-### Added roxygen skeleton? 🚧
+### Added roxygen skeleton? ✅
 
 Use a roxygen skeleton for auto documentation and making sure proposed
 functions are *exported*.
 
-### Managed dependencies ? 🚧
+### Managed dependencies ? ✅
 
 Package dependencies managed, i.e. `depend::function()` in proposed
 functions and declared in the DESCRIPTION
@@ -120,7 +156,6 @@ functions and declared in the DESCRIPTION
 ``` r
 usethis::use_package("ggplot2")
 #> ✔ Setting active project to '/Users/evangelinereynolds/Google Drive/r_packages/ggpie'
-#> ✔ Adding 'ggplot2' to Imports field in DESCRIPTION
 #> • Refer to functions with `ggplot2::fun()`
 ```
 
@@ -167,8 +202,6 @@ to change.
 
 ``` r
 usethis::use_lifecycle_badge("experimental")
-#> ✔ Adding Lifecycle: experimental badge to 'README.Rmd'
-#> • Re-knit 'README.Rmd' with `devtools::build_readme()`
 ```
 
 ## Phase 2: Listen & iterate 🚧
