@@ -1,0 +1,223 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# ggpie  🦄
+
+<!-- badges: start -->
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+<!-- badges: end -->
+
+The goal of ggpie is to ... 🦄
+
+```{r, eval = F}
+ggpie(diamonds) + 
+  aes(fill = cut) + 
+  geom_wedges()
+```
+
+
+### Alternative without ggpie
+
+We're looking at a geom_bar analogue, but it might be nice to do a geom_col too, where you have the counts yourself.  
+
+```{r}
+library(tidyverse)
+diamonds %>%
+ggplot() + 
+  aes(x = "all", fill = cut) + 
+  geom_bar() + 
+  coord_polar(theta = "y") + 
+  theme_void()
+```
+
+# Developing the new API.
+
+```{r, pie_functions}
+defaults_pie <- function(){
+  
+  list(aes(x = "all"),
+  coord_polar(theta = "y"),
+  theme_void()
+  )
+  
+}
+
+ggpie <- function(data){
+  
+  ggplot(data = data) + 
+  defaults_pie()
+  
+  
+}
+
+# just aliasing to be nice to ourselves
+geom_wedge <- function(...){
+  
+  geom_bar(...)
+  
+}
+
+
+```
+
+
+## Test it out
+
+
+```{r}
+ggpie(diamonds) + 
+  aes(fill = cut) +
+  geom_wedge() 
+```
+
+
+# Part II. Packaging and documentation  🚧 ✅ 
+
+
+
+## Phase 1. Minimal working package
+
+### Created files for package archetecture with `devtools::create(".")` ✅ 
+
+### Moved functions R folder? ✅  
+
+```{r}
+knitr::knit_code$get() |> names()
+```
+
+Use new {readme2pkg} function to do this from readme...
+
+```{r, eval = F}
+readme2pkg::chunk_to_r("pie_functions")
+```
+
+
+
+### Added roxygen skeleton? 🚧 
+
+Use a roxygen skeleton for auto documentation and making sure proposed functions are *exported*.
+
+### Managed dependencies ? 🚧 
+
+Package dependencies managed, i.e. `depend::function()` in proposed functions and declared in the DESCRIPTION
+
+```{r}
+usethis::use_package("ggplot2")
+```
+
+
+
+### Chosen a license? ✅ 
+
+
+```{r}
+usethis::use_mit_license()
+```
+
+### Run `devtools::check()` and addressed errors? 🚧 
+
+```{r, results='hide', error=T}
+devtools::check(pkg = ".")
+```
+
+### Build package 🚧 
+
+```{r}
+devtools::build()
+```
+
+You need to do this before library(mynewpackage) will work.
+
+### Make aspirational part of readme real. 🚧 
+
+At this point, you could change eval chunk options to TRUE. You can remove  the 🦄 emoji and perhaps replace it with construction site if you are still uncertain of the API, and want to highlight that it is subject to change. 
+
+### Add lifecycle badge (experimental)✅  
+
+```{r}
+usethis::use_lifecycle_badge("experimental")
+```
+
+
+## Phase 2: Listen & iterate 🚧 
+
+Try to get feedback from experts on API, implementation, default decisions.  Is there already work that solves this problem? 
+
+
+## Phase 3: Let thinggs settle
+
+### Settled on examples.  Put them in the roxygen skeleton and readme. 🚧 
+
+### Written formal tests of functions? 🚧 
+
+
+That would look like this...
+
+```{r test_calc_frequency_works, eval = F}
+library(testthat)
+
+test_that("calc frequency works", {
+  expect_equal(calc_frequency("A", 0), 440)
+  expect_equal(calc_frequency("A", -1), 220)
+  
+})
+```
+
+
+```{r, eval = F}
+readme2pkg::chunk_to_tests_testthat("test_calc_frequency_works")
+```
+
+
+### Have you worked added a description and author information in the DESCRIPTION file? 🚧 
+
+### Addressed *all* notes, warnings and errors. 🚧 
+
+## Promote to wider audience...
+
+### Package website built? 🚧 
+
+### Package website deployed? 🚧 
+
+## Phase 3: Harden/commit
+
+### Submit to CRAN? Or don't.  🚧 
+
+# Appendix: Reports, Environment
+
+## Description file extract
+
+```{r}
+
+```
+
+## Environment
+
+Here I just want to print the packages and the versions
+
+```{r}
+all <- sessionInfo() |> print() |> capture.output()
+all[11:17]
+```
+
+## `devtools::check()` report
+
+```{r, error = T, results="hide", warning=F}
+devtools::check(pkg = ".")
+```
+
+
+
+
