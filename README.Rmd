@@ -14,26 +14,30 @@ knitr::opts_chunk$set(
 options(tidyverse.quiet = TRUE)
 ```
 
-# ggpie  🦄 (is mostly mythical)
+# ggpie  🦄 (is mostly mythical), probably changing to ggwedge
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-The goal of ggpie is to allow this 🦄 interface:
+The goal of ggpie is to allow this interface:
 
-```{r, eval = F}
+```{r, eval = T}
+library(ggplot2)
 library(ggpie)
 
 ggpie(diamonds) + 
-  aes(fill = cut) + 
-  geom_wedges()
+  aes(fill = color) + 
+  geom_wedge() 
+
+last_plot() + 
+  facet_wrap(facets = vars(cut))
 ```
 
 
 Observations:  the `ggplot()` function start point has a particular set of defaults that might not be the best suited for final plot.
 
-Assertion: other defaults can be bundled up and serve as grammatically-unproblematic alternative start points.
+Assertion: other defaults can be bundled up and serve as grammatically-equivalent alternative start points.
 
 
 ### Alternative without ggpie
@@ -42,10 +46,11 @@ We're looking at a geom_bar analogue, but it might be nice to do a geom_col too,
 
 ```{r}
 library(tidyverse)
+
 diamonds %>%
 ggplot() + 
   aes(x = 0, fill = cut) + 
-  geom_bar() + 
+  geom_bar(position = "fill") + 
   coord_polar(theta = "y") + 
   theme_void()
 ```
@@ -59,10 +64,10 @@ ggplot() +
 #' @export
 #'
 #' @examples
-defaults_pie <- function(){
+defaults_pie <- function(...){
   
   list(
-    ggplot2::coord_polar(theta = "y"),
+    ggplot2::coord_polar(theta = "y", ...),
     ggplot2::theme_void(),
     ggplot2::aes(x = 0) # hacky; grammar problem
   )
@@ -98,10 +103,35 @@ ggpie <- function(data){
 #' @examples
 geom_wedge <- function(...){
   
-  ggplot2::geom_bar(...)
+  ggplot2::geom_bar(position = "fill", ...)
   
 }
 
+
+# some very preliminary and messy ideas for new Stat Wedge approach
+# but wondering if this is worth it.  
+# I think it could be if geom is used with ggplot() start point.
+# StatWedge <- ggproto(`_class` = StatCount2, 
+#                      `_inherit` = ggplot2::Stat,
+#                      compute_group )
+# 
+# ggplot2::StatCount$compute_group %>% 
+#   mutate(x)
+# 
+# stat_count
+
+# geom_wedge <- function (mapping = NULL, data = NULL, geom = "bar", 
+#                         position = "fill", 
+#                         ..., width = NULL, na.rm = FALSE, 
+#                         orientation = NA, show.legend = NA, 
+#                         inherit.aes = TRUE) 
+# {
+#     params <- list2(na.rm = na.rm, orientation = orientation, 
+#         width = width, ...)
+#     layer(data = data, mapping = mapping, stat = StatCount, geom = geom, 
+#         position = position, show.legend = show.legend, inherit.aes = inherit.aes, 
+#         params = params)
+# }
 
 ```
 
@@ -118,7 +148,7 @@ ggpie(diamonds) +
 ggpie(diamonds) + 
   aes(fill = cut) +
   geom_wedge() +
-  xlim(-2,1)
+  xlim(-2, 1)
   
 ```
 
@@ -139,10 +169,9 @@ knitr::knit_code$get() |> names()
 
 Use new {readme2pkg} function to do this from readme... ✅ 
 
-```{r, eval = F}
+```{r}
 readme2pkg::chunk_to_r("pie_functions")
 ```
-
 
 
 ### Added roxygen skeleton? ✅ 
@@ -153,7 +182,7 @@ Use a roxygen skeleton for auto documentation and making sure proposed functions
 
 Package dependencies managed, i.e. `depend::function()` in proposed functions and declared in the DESCRIPTION
 
-```{r}
+```{r pkg_dependencies}
 usethis::use_package("ggplot2")
 ```
 
@@ -162,19 +191,21 @@ usethis::use_package("ggplot2")
 ### Chosen a license? ✅ 
 
 
-```{r}
+```{r pkg_license}
 usethis::use_mit_license()
 ```
 
 ### Run `devtools::check()` and addressed errors? 🚧 
 
-```{r, results='hide', error=T}
+```{r pkg_check, results='hide', error=T}
 devtools::check(pkg = ".")
 ```
 
+
+
 ### Build package 🚧 
 
-```{r}
+```{r pkg_build}
 devtools::build()
 ```
 
@@ -186,7 +217,7 @@ At this point, you could change eval chunk options to TRUE. You can remove  the 
 
 ### Add lifecycle badge (experimental)✅  
 
-```{r}
+```{r pkg_lifecycle_badge}
 usethis::use_lifecycle_badge("experimental")
 ```
 
@@ -211,12 +242,11 @@ library(testthat)
 test_that("calc frequency works", {
   expect_equal(calc_frequency("A", 0), 440)
   expect_equal(calc_frequency("A", -1), 220)
-  
 })
 ```
 
 
-```{r, eval = F}
+```{r send_tests, eval = F}
 readme2pkg::chunk_to_tests_testthat("test_calc_frequency_works")
 ```
 
@@ -247,14 +277,14 @@ readme2pkg::chunk_to_tests_testthat("test_calc_frequency_works")
 
 Here I just want to print the packages and the versions
 
-```{r}
+```{r session_pkgs}
 all <- sessionInfo() |> print() |> capture.output()
 all[11:17]
 ```
 
 ## `devtools::check()` report
 
-```{r, error = T, results="hide", warning=F}
+```{r report_check, error = T, results="hide", warning=F}
 devtools::check(pkg = ".")
 ```
 

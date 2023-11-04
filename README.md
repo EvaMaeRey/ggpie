@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# ggpie 🦄 (is mostly mythical)
+# ggpie 🦄 (is mostly mythical), probably changing to ggwedge
 
 <!-- badges: start -->
 
@@ -9,21 +9,32 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-The goal of ggpie is to allow this 🦄 interface:
+The goal of ggpie is to allow this interface:
 
 ``` r
+library(ggplot2)
 library(ggpie)
 
 ggpie(diamonds) + 
-  aes(fill = cut) + 
-  geom_wedges()
+  aes(fill = color) + 
+  geom_wedge() 
 ```
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
+``` r
+
+last_plot() + 
+  facet_wrap(facets = vars(cut))
+```
+
+<img src="man/figures/README-unnamed-chunk-2-2.png" width="100%" />
 
 Observations: the `ggplot()` function start point has a particular set
 of defaults that might not be the best suited for final plot.
 
 Assertion: other defaults can be bundled up and serve as
-grammatically-unproblematic alternative start points.
+grammatically-equivalent alternative start points.
 
 ### Alternative without ggpie
 
@@ -32,10 +43,11 @@ geom\_col too, where you have the counts yourself.
 
 ``` r
 library(tidyverse)
+
 diamonds %>%
 ggplot() + 
   aes(x = 0, fill = cut) + 
-  geom_bar() + 
+  geom_bar(position = "fill") + 
   coord_polar(theta = "y") + 
   theme_void()
 ```
@@ -51,10 +63,10 @@ ggplot() +
 #' @export
 #'
 #' @examples
-defaults_pie <- function(){
+defaults_pie <- function(...){
   
   list(
-    ggplot2::coord_polar(theta = "y"),
+    ggplot2::coord_polar(theta = "y", ...),
     ggplot2::theme_void(),
     ggplot2::aes(x = 0) # hacky; grammar problem
   )
@@ -90,9 +102,35 @@ ggpie <- function(data){
 #' @examples
 geom_wedge <- function(...){
   
-  ggplot2::geom_bar(...)
+  ggplot2::geom_bar(position = "fill", ...)
   
 }
+
+
+# some very preliminary and messy ideas for new Stat Wedge approach
+# but wondering if this is worth it.  
+# I think it could be if geom is used with ggplot() start point.
+# StatWedge <- ggproto(`_class` = StatCount2, 
+#                      `_inherit` = ggplot2::Stat,
+#                      compute_group )
+# 
+# ggplot2::StatCount$compute_group %>% 
+#   mutate(x)
+# 
+# stat_count
+
+# geom_wedge <- function (mapping = NULL, data = NULL, geom = "bar", 
+#                         position = "fill", 
+#                         ..., width = NULL, na.rm = FALSE, 
+#                         orientation = NA, show.legend = NA, 
+#                         inherit.aes = TRUE) 
+# {
+#     params <- list2(na.rm = na.rm, orientation = orientation, 
+#         width = width, ...)
+#     layer(data = data, mapping = mapping, stat = StatCount, geom = geom, 
+#         position = position, show.legend = show.legend, inherit.aes = inherit.aes, 
+#         params = params)
+# }
 ```
 
 ## Test it out
@@ -111,7 +149,7 @@ ggpie(diamonds) +
 ggpie(diamonds) + 
   aes(fill = cut) +
   geom_wedge() +
-  xlim(-2,1)
+  xlim(-2, 1)
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-2.png" width="100%" />
@@ -129,12 +167,12 @@ knitr::knit_code$get() |> names()
 #>  [1] "unnamed-chunk-1"           "unnamed-chunk-2"          
 #>  [3] "unnamed-chunk-3"           "pie_functions"            
 #>  [5] "unnamed-chunk-4"           "unnamed-chunk-5"          
-#>  [7] "unnamed-chunk-6"           "unnamed-chunk-7"          
-#>  [9] "unnamed-chunk-8"           "unnamed-chunk-9"          
-#> [11] "unnamed-chunk-10"          "unnamed-chunk-11"         
-#> [13] "test_calc_frequency_works" "unnamed-chunk-12"         
-#> [15] "unnamed-chunk-13"          "unnamed-chunk-14"         
-#> [17] "unnamed-chunk-15"
+#>  [7] "unnamed-chunk-6"           "pkg_dependencies"         
+#>  [9] "pkg_license"               "pkg_check"                
+#> [11] "pkg_build"                 "pkg_lifecycle_badge"      
+#> [13] "test_calc_frequency_works" "send_tests"               
+#> [15] "unnamed-chunk-7"           "session_pkgs"             
+#> [17] "report_check"
 ```
 
 Use new {readme2pkg} function to do this from readme… ✅
@@ -171,6 +209,21 @@ usethis::use_mit_license()
 devtools::check(pkg = ".")
 #> ℹ Updating ggpie documentation
 #> ℹ Loading ggpie
+#> Warning: ── Conflicts ──────────────────────────────────────────────── ggpie conflicts
+#> ──
+#> ✖ `defaults_pie` masks `ggpie::defaults_pie()`.
+#> ✖ `geom_wedge` masks `ggpie::geom_wedge()`.
+#> ✖ `ggpie` masks `ggpie::ggpie()`.
+#> ℹ Did you accidentally source a file rather than using `load_all()`?
+#>   Run `rm(list = c("defaults_pie", "geom_wedge", "ggpie"))` to remove the
+#>   conflicts.
+#> Warning: [pie_functions.R:3] @return requires a value
+#> Warning: [pie_functions.R:6] @examples requires a value
+#> Warning: [pie_functions.R:21] @return requires a value
+#> Warning: [pie_functions.R:24] @examples requires a value
+#> Warning: [pie_functions.R:40] @return requires a value
+#> Warning: [pie_functions.R:43] @examples requires a value
+#> Writing 'defaults_pie.Rd'
 #> Error: R CMD check found WARNINGs
 ```
 
@@ -184,7 +237,6 @@ devtools::build()
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
 #> * checking for empty or unneeded directories
-#> Removed empty directory ‘ggpie/R’
 #> * building ‘ggpie_0.0.0.9000.tar.gz’
 #> [1] "/Users/evangelinereynolds/Google Drive/r_packages/ggpie_0.0.0.9000.tar.gz"
 ```
@@ -223,7 +275,6 @@ library(testthat)
 test_that("calc frequency works", {
   expect_equal(calc_frequency("A", 0), 440)
   expect_equal(calc_frequency("A", -1), 220)
-  
 })
 ```
 
