@@ -49,10 +49,65 @@ ggplot() +
   aes(x = 0, fill = cut) + 
   geom_bar(position = "fill") + 
   coord_polar(theta = "y") + 
-  theme_void()
+  theme_void() + 
+  stat_count(position = "fill", 
+             geom = "text", 
+             color = "white",
+             aes(label = after_stat(count*100/sum(count)) |> 
+                   round(1) |> paste0("%")))
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+
+``` r
+
+
+ggtrace::layer_after_stat(i = 2, verbose = T)
+#> ✔ Executed `ggtrace_inspect_return(last_plot(), ggplot2:::Layer$compute_statistic, cond = 2L)`
+#> # A tibble: 5 × 8
+#>   count  prop     x width flipped_aes fill      PANEL group
+#>   <dbl> <dbl> <dbl> <dbl> <lgl>       <ord>     <fct> <int>
+#> 1  1610     1     0   0.9 FALSE       Fair      1         1
+#> 2  4906     1     0   0.9 FALSE       Good      1         2
+#> 3 12082     1     0   0.9 FALSE       Very Good 1         3
+#> 4 13791     1     0   0.9 FALSE       Premium   1         4
+#> 5 21551     1     0   0.9 FALSE       Ideal     1         5
+ggtrace::layer_after_scale(i = 2, verbose = T) %>% data.frame()
+#> ✔ Executed `ggtrace_inspect_return(last_plot(), ggplot2:::Layer$compute_geom_2, cond = 2L)`
+#>        fill label         y count prop x width flipped_aes PANEL group
+#> 1 #440154FF    3% 1.0000000  1610    1 0   0.9       FALSE     1     1
+#> 2 #3B528BFF  9.1% 0.9701520  4906    1 0   0.9       FALSE     1     2
+#> 3 #21908CFF 22.4% 0.8791991 12082    1 0   0.9       FALSE     1     3
+#> 4 #5DC863FF 25.6% 0.6552095 13791    1 0   0.9       FALSE     1     4
+#> 5 #FDE725FF   40% 0.3995365 21551    1 0   0.9       FALSE     1     5
+#>        ymax xmin xmax      ymin colour size angle hjust vjust alpha family
+#> 1 1.0000000    0    0 0.9701520  white 3.88     0   0.5   0.5    NA       
+#> 2 0.9701520    0    0 0.8791991  white 3.88     0   0.5   0.5    NA       
+#> 3 0.8791991    0    0 0.6552095  white 3.88     0   0.5   0.5    NA       
+#> 4 0.6552095    0    0 0.3995365  white 3.88     0   0.5   0.5    NA       
+#> 5 0.3995365    0    0 0.0000000  white 3.88     0   0.5   0.5    NA       
+#>   fontface lineheight
+#> 1        1        1.2
+#> 2        1        1.2
+#> 3        1        1.2
+#> 4        1        1.2
+#> 5        1        1.2
+```
+
+``` r
+last_plot() + 
+    stat_count(position = "fill", 
+             geom = "text", 
+             color = "white",
+             aes(label = after_stat(count*100/sum(count)) |> 
+                   round(1) |> paste0("%"),
+                 y = after_scale((ymin + ymax)/2)))
+#> Error in `stat_count()`:
+#> ! Problem while setting up geom.
+#> ℹ Error occurred in the 3rd layer.
+#> Caused by error in `compute_geom_1()`:
+#> ! `geom_text()` requires the following missing aesthetics: y
+```
 
 # Developing the new API.
 
@@ -141,7 +196,7 @@ ggpie(diamonds) +
   geom_wedge() 
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 ``` r
 
@@ -152,7 +207,7 @@ ggpie(diamonds) +
   xlim(-2, 1)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-2.png" width="100%" />
 
 # Part II. Packaging and documentation 🚧 ✅
 
@@ -165,14 +220,14 @@ ggpie(diamonds) +
 ``` r
 knitr::knit_code$get() |> names()
 #>  [1] "unnamed-chunk-1"           "unnamed-chunk-2"          
-#>  [3] "unnamed-chunk-3"           "pie_functions"            
-#>  [5] "unnamed-chunk-4"           "unnamed-chunk-5"          
-#>  [7] "unnamed-chunk-6"           "pkg_dependencies"         
-#>  [9] "pkg_license"               "pkg_check"                
-#> [11] "pkg_build"                 "pkg_lifecycle_badge"      
-#> [13] "test_calc_frequency_works" "send_tests"               
-#> [15] "unnamed-chunk-7"           "session_pkgs"             
-#> [17] "report_check"
+#>  [3] "unnamed-chunk-3"           "unnamed-chunk-4"          
+#>  [5] "pie_functions"             "unnamed-chunk-5"          
+#>  [7] "unnamed-chunk-6"           "unnamed-chunk-7"          
+#>  [9] "pkg_dependencies"          "pkg_license"              
+#> [11] "pkg_check"                 "pkg_build"                
+#> [13] "pkg_lifecycle_badge"       "test_calc_frequency_works"
+#> [15] "send_tests"                "unnamed-chunk-8"          
+#> [17] "session_pkgs"              "report_check"
 ```
 
 Use new {readme2pkg} function to do this from readme… ✅
@@ -223,7 +278,6 @@ devtools::check(pkg = ".")
 #> Warning: [pie_functions.R:24] @examples requires a value
 #> Warning: [pie_functions.R:40] @return requires a value
 #> Warning: [pie_functions.R:43] @examples requires a value
-#> Writing 'defaults_pie.Rd'
 #> Error: R CMD check found WARNINGs
 ```
 

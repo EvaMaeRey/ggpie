@@ -52,7 +52,32 @@ ggplot() +
   aes(x = 0, fill = cut) + 
   geom_bar(position = "fill") + 
   coord_polar(theta = "y") + 
-  theme_void()
+  theme_void() + 
+  stat_count(position = "fill", 
+             geom = "text", 
+             color = "white",
+             aes(label = after_stat(count*100/sum(count)) |> 
+                   round(1) |> paste0("%")))
+
+
+ggtrace::layer_after_stat(i = 2, verbose = T)
+ggtrace::layer_after_scale(i = 2, verbose = T) %>% data.frame()
+
+```
+
+
+
+```{r, error=T}
+last_plot() + 
+    stat_count(position = "fill", 
+             geom = "text", 
+             color = "white",
+             aes(label = after_stat(count*100/sum(count)) |> 
+                   round(1) |> paste0("%"),
+                 y = after_scale((ymin + ymax)/2)))
+  
+
+
 ```
 
 # Developing the new API.
